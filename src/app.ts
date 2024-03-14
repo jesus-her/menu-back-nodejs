@@ -25,7 +25,7 @@ app.use('/categories', categoryRoutes)
 app.use('/products', productRoutes)
 
 // socket.io
-export const server = http.createServer(app)
+const server = http.createServer(app)
 // const io = new SocketServer(httpServer)
 const io = new SocketServer(server, {
   cors: {
