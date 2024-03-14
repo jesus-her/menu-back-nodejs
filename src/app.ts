@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import http, { createServer } from 'http'
 import { Server as SocketServer } from 'socket.io'
-import socketHandlers from '../src/sockets/socketHandlers'
+import cors from 'cors'
 
 dotenv.config()
 import express from 'express'
@@ -10,7 +10,7 @@ import usersRoutes from './routes/userRoutes'
 import storesRoutes from './routes/storeRoutes'
 import categoryRoutes from './routes/categoryRoutes'
 import productRoutes from './routes/productRoutes'
-import cors from 'cors'
+import socketHandlers from '../src/sockets/socketHandlers'
 
 const app = express()
 app.use(cors())
