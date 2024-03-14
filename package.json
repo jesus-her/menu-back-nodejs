@@ -4,7 +4,7 @@
   "description": "Proyecto de Node con Typescript donde usaremos como BD PostgreSQL y para autenticar JWT",
   "main": "src/app.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
+    "dev": "tsnd --respawn --clear src/server.ts",
     "build": "rimraf ./dist && tsc",
     "start": "node dist/server.js"
   },
