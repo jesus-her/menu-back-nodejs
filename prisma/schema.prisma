@@ -17,4 +17,35 @@ model user {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   password String
+  storeId  Int?
+  store    Store?  @relation(fields: [storeId], references: [id])
 }
+
+model Store {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  categories  Category[]   @relation("StoreCategories")
+  products    Product[]    @relation("StoreProducts")
+  users       user[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  storeId     Int
+  store       Store    @relation(fields: [storeId], references: [id], name: "StoreProducts")
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id      Int       @id @default(autoincrement())
+  name    String
+  storeId Int
+  store   Store     @relation(fields: [storeId], references: [id], name: "StoreCategories")
+  products Product[]
+}
+

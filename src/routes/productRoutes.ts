@@ -1,13 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import {
-  createUser,
-  deleteUser,
-  getAllUsers,
-  getUserById,
-  getUserByEmail,
-  updateUser
-} from '../controllers/usersController'
+  createProduct,
+  getAllProducts,
+  //   getProductsByStore,
+  updateProduct,
+  deleteProduct
+} from '../controllers/productController'
 
 const router = express.Router()
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret'
@@ -25,16 +24,14 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
       console.error('Error en la autenticación: ', err)
       return res.status(403).json({ error: 'No tienes acceso a este recurso' })
     }
-
     next()
   })
 }
 
-router.post('/', authenticateToken, createUser)
-router.get('/', authenticateToken, getAllUsers)
-router.get('/:id', authenticateToken, getUserById)
-router.get('/user/:email', getUserByEmail)
-router.put('/:id', authenticateToken, updateUser)
-router.delete('/:id', authenticateToken, deleteUser)
+router.post('/', createProduct)
+router.get('/', getAllProducts)
+// router.get('/:id', getProductsByStore)
+router.patch('/:id', updateProduct)
+router.delete('/:id', deleteProduct)
 
 export default router
