@@ -10,7 +10,7 @@ import usersRoutes from './routes/userRoutes'
 import storesRoutes from './routes/storeRoutes'
 import categoryRoutes from './routes/categoryRoutes'
 import productRoutes from './routes/productRoutes'
-import socketHandlers from '../src/sockets/socketHandlers'
+import socketHandlers from './sockets/socketHandlers'
 
 const app = express()
 app.use(cors())
