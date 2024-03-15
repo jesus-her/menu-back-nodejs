@@ -15,6 +15,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ message: 'El password es obligatorio' })
       return
     }
+    if (!storeId) {
+      res.status(400).json({ message: 'El storeId es obligatorio' })
+      return
+    }
 
     // Opcional: validar que el storeId proporcionado exista en la base de datos
 
