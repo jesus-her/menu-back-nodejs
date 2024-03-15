@@ -184,14 +184,14 @@ const socketHandlers = (io: Server) => {
     socket.on(
       'UPDATE_CART',
       ({ roomId, username, cartList, cartPrice }, callback) => {
-        console.log(`Updating cart for room: ${roomId}, user: ${username}`) // Imprimir para depuración
+        // console.log(`Updating cart for room: ${roomId}, user: ${username}`) // Imprimir para depuración
         if (rooms[roomId]) {
           let cartUpdated = false
 
           // Buscar el carrito del usuario y actualizarlo
           rooms[roomId].sharedCartList.forEach(cart => {
             if (cart.username === username) {
-              console.log(`Found cart for user: ${cart.cartList}`) // Imprimir para depuración
+              // console.log(`Found cart for user: ${cart.cartList}`) // Imprimir para depuración
               cart.cartList = cartList
               cart.cartPrice = cartPrice
               cartUpdated = true
