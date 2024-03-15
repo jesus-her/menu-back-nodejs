@@ -31,7 +31,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
 }
 
 router.post('/', authenticateToken, createUser)
-router.get('/', authenticateToken, getAllUsers)
+router.get('/', getAllUsers)
 router.get('/:id', authenticateToken, getUserById)
 router.get('/user/:email', getUserByEmail)
 router.put('/:id', authenticateToken, updateUser)

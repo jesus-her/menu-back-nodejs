@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const userData = {
       email,
       password: hashedPassword,
-      ...(storeId && { storeId }) // Condicionalemente añade storeId si se proporciona
+      storeId
     }
 
     const user = await prisma.create({
@@ -73,7 +73,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const userResponse = {
       id: user.id,
       email: user.email,
-      storeId: user.storeid // Asegúrate de que 'storeId' está definido en tu modelo User
+      storeId: user.storeId // Asegúrate de que 'storeId' está definido en tu modelo User
     }
     res.status(200).json({ token, user: userResponse })
   } catch (error: any) {
