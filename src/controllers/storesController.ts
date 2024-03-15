@@ -55,7 +55,7 @@ export const getAllStores = async (
           select: {
             id: true,
             email: true,
-            storeId: true
+            storeid: true
           }
         }
         // products: true, // Incluye los productos si también deseas obtenerlos
@@ -86,7 +86,7 @@ export const getStoreById = async (
           select: {
             id: true,
             email: true,
-            storeId: true
+            storeid: true
             // No incluyes el password aquí, por lo que se excluye
           }
         }
