@@ -8,7 +8,8 @@ export const createStore = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, description } = req.body
+    const { name, description, logoUrl, igUrl, phone, address, themeColor } =
+      req.body
 
     // Validaciones básicas para name y description
     if (!name) {
@@ -24,7 +25,12 @@ export const createStore = async (
     const store = await prisma.store.create({
       data: {
         name,
-        description
+        description,
+        logoUrl,
+        igUrl,
+        phone,
+        address,
+        themeColor
       }
     })
 
@@ -112,14 +118,20 @@ export const updateStore = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params
-  const { name, description } = req.body
+  const { name, description, logoUrl, igUrl, phone, address, themeColor } =
+    req.body
 
   try {
     const store = await prisma.store.update({
       where: { id: Number(id) },
       data: {
         name,
-        description
+        description,
+        logoUrl,
+        igUrl,
+        phone,
+        address,
+        themeColor
       }
     })
 

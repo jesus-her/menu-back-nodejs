@@ -28,11 +28,11 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   })
 }
 
-router.post('/', createStore)
+router.post('/', authenticateToken, createStore)
 router.get('/', getAllStores)
 // router.get('/', authenticateToken, getAllStores)
 router.get('/:id', getStoreById)
-router.patch('/:id', updateStore)
-router.delete('/:id', deleteStore)
+router.patch('/:id', authenticateToken, updateStore)
+router.delete('/:id', authenticateToken, deleteStore)
 
 export default router
