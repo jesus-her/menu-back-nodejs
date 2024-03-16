@@ -7,7 +7,7 @@ export const createProduct = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { name, description, price, storeId, categoryId } = req.body
+  const { name, description, price, storeId, categoryId, image } = req.body
 
   // Agrega aquí validaciones para los datos de entrada
   if (!name || !storeId || !categoryId || !price || !description) {
@@ -30,6 +30,7 @@ export const createProduct = async (
         name,
         description,
         price,
+        image,
         store: {
           connect: { id: storeId }
         },
@@ -136,7 +137,7 @@ export const updateProduct = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params
-  const { name, description, price, categoryId } = req.body
+  const { name, description, price, categoryId, image } = req.body
 
   try {
     const updatedProduct = await prisma.product.update({
@@ -145,6 +146,7 @@ export const updateProduct = async (
         name,
         description,
         price,
+        image,
         category: {
           connect: { id: categoryId }
         }
