@@ -25,6 +25,7 @@ model Store {
   phone       String?
   themeColor  String?
   categories  Category[] @relation("StoreCategories")
+  banners     Banner[] @relation("StoreBanners")
   products    Product[]  @relation("StoreProducts")
   users       user[]
 }
@@ -47,4 +48,15 @@ model Category {
   storeId  Int
   store    Store     @relation("StoreCategories", fields: [storeId], references: [id])
   products Product[]
+}
+
+
+model Banner {
+  id            Int       @id @default(autoincrement())
+  title         String
+  subtitle      String
+  image         String
+  description   String
+  storeId       Int
+  store         Store     @relation("StoreBanners", fields: [storeId], references: [id])
 }

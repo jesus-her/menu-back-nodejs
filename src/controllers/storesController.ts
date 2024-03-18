@@ -57,6 +57,7 @@ export const getAllStores = async (
     const stores = await prisma.store.findMany({
       include: {
         categories: true, // Incluye las categorías relacionadas
+        banners: true,
         users: {
           select: {
             id: true,
@@ -88,6 +89,7 @@ export const getStoreById = async (
       },
       include: {
         categories: true, // Incluye las categorías relacionadas
+        banners: true,
         users: {
           select: {
             id: true,
