@@ -11,6 +11,7 @@ import storesRoutes from './routes/storeRoutes'
 import categoryRoutes from './routes/categoryRoutes'
 import productRoutes from './routes/productRoutes'
 import bannerRoutes from './routes/bannerRoute'
+import orderRoutes from './routes/orderRoute'
 import socketHandlers from './sockets/socketHandlers'
 
 const app = express()
@@ -25,6 +26,7 @@ app.use('/stores', storesRoutes)
 app.use('/categories', categoryRoutes)
 app.use('/products', productRoutes)
 app.use('/banners', bannerRoutes)
+app.use('/orders', orderRoutes)
 
 // socket.io
 const server = http.createServer(app)

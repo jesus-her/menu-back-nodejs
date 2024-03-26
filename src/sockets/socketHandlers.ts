@@ -1,6 +1,5 @@
 // sockets/socketHandlers.ts
 import { Server, Socket } from 'socket.io'
-// import { type IProduct } from '../interfaces/product'
 
 interface IProduct {
   name: string
@@ -16,6 +15,7 @@ interface User {
   online: boolean
   socketId: string
   disconnectTimeout?: NodeJS.Timeout
+  intentionalDisconnect?: boolean
 }
 
 interface Room {
@@ -40,7 +40,7 @@ let rooms: Rooms = {
 
 const socketHandlers = (io: Server) => {
   io.on('connection', (socket: Socket) => {
-    console.log(`🟢 Usuario conectado: ${socket.id}`)
+    // console.log(`🟢 Usuario conectado: ${socket.id}`)
 
     socket.on('create room', callback => {
       const roomId = Math.random().toString(36).substring(2, 7) // Considera usar una librería para IDs únicos
@@ -199,7 +199,7 @@ const socketHandlers = (io: Server) => {
           })
 
           if (cartUpdated) {
-            console.log(`Cart updated for user: ${username}`) // Imprimir para depuración
+            // console.log(`Cart updated for user: ${username}`) // Imprimir para depuración
 
             // Emitir evento de carrito compartido actualizado a cada usuario en la sala
             rooms[roomId].sharedCartList.forEach(user => {
@@ -210,13 +210,13 @@ const socketHandlers = (io: Server) => {
             })
 
             // Respuesta de éxito
-            console.log('💥 MY EMIT:', rooms[roomId].sharedCartList)
+            // console.log('💥 MY EMIT:', rooms[roomId].sharedCartList)
             callback({
               status: 'success',
               sharedCartList: rooms[roomId].sharedCartList
             })
           } else {
-            console.log(`Cart not found for user: ${username}`) // Imprimir para depuración
+            // console.log(`Cart not found for user: ${username}`) // Imprimir para depuración
             // Error si no se encuentra el carrito del usuario
             callback({
               status: 'error',
@@ -230,8 +230,105 @@ const socketHandlers = (io: Server) => {
       }
     )
 
+    // handle order complete
+    socket.on('ORDER_COMPLETED', ({ roomId, storeId, orderId }, callback) => {
+      const room = rooms[roomId]
+      if (room) {
+        // Optionally perform cleanup if necessary, such as saving the order data
+        // ...
+
+        // Emit an event to all clients in the room to redirect them
+        io.in(roomId).emit('REDIRECT', `${storeId}/thank-you/${orderId}`)
+
+        // Now you can delete the room or mark it as inactive
+        // delete rooms[roomId]; // if you want to delete the room
+        callback({
+          status: 'success',
+          message: 'Redirecting to thank you page.'
+        })
+      } else {
+        callback({ status: 'error', message: 'Room does not exist.' })
+      }
+    })
+
+    // Add an event for intentional leaving (e.g., when completing an order)
+    // socket.on(
+    //   'leave_and_redirect',
+    //   ({ roomId, storeId, orderId }, callback) => {
+    //     const room = rooms[roomId]
+    //     if (room) {
+    //       // Mark the disconnect as intentional
+    //       const member = room.members.find(
+    //         member => member.socketId === socket.id
+    //       )
+    //       if (member) {
+    //         member.intentionalDisconnect = true // Set the flag
+    //         clearTimeout(member.disconnectTimeout) // Clear any disconnect timeout
+    //       }
+
+    //       // Emit the redirect event to the client
+    //       io.in(roomId).emit('REDIRECT', `/${storeId}/thank-you/${orderId}`)
+
+    //       // Remove all users from the room
+    //       room.members.forEach(member => {
+    //         // This ensures each member's disconnect is intentional
+    //         member.intentionalDisconnect = true
+    //         // It could also immediately emit 'SHARED_CART_UPDATED' to reflect the empty room
+    //         // but since we're deleting the room, it might not be necessary
+    //       })
+
+    //       // Clean up the room
+    //       delete rooms[roomId]
+
+    //       // Perform any additional cleanup here
+    //       // ...
+
+    //       callback({
+    //         status: 'success',
+    //         message: 'Redirecting to thank you page.'
+    //       })
+    //     }
+    //   }
+    // )
+
+    // socketHandlers.ts (Back-End)
+
+    socket.on(
+      'leave_and_redirect',
+      ({ roomId, storeId, orderId }, callback) => {
+        const room = rooms[roomId]
+        if (room) {
+          // Mark the disconnect as intentional for all members and clear timeouts
+          room.members.forEach(member => {
+            member.intentionalDisconnect = true // Set the flag
+            if (member.disconnectTimeout) {
+              clearTimeout(member.disconnectTimeout) // Clear any disconnect timeouts
+            }
+            io.sockets.sockets.get(member.socketId)?.disconnect(true) // Disconnect the member
+          })
+
+          // Perform the redirection after a brief delay to ensure disconnection
+          setTimeout(() => {
+            io.in(roomId).emit('REDIRECT', `/${storeId}/thank-you/${orderId}`)
+          }, 100)
+
+          // Cleanup: remove the room after a delay to ensure all sockets are disconnected
+          setTimeout(() => {
+            delete rooms[roomId]
+          }, 500)
+
+          callback({
+            status: 'success',
+            message: 'Redirecting to thank you page.'
+          })
+        } else {
+          callback({ status: 'error', message: 'Room does not exist.' })
+        }
+      }
+    )
+
     socket.on('disconnect', () => {
-      console.log(`🔴 Usuario desconectado: ${socket.id}`)
+      // console.log(`🔴 Usuario desconectado: ${socket.id}`)
 
       // Encuentra todas las salas a las que pertenece el socket y actualiza su estado en línea
       Object.keys(rooms).forEach(roomId => {
@@ -246,27 +343,81 @@ const socketHandlers = (io: Server) => {
           member.online = false
 
           // Inicia un temporizador para esperar antes de eliminar al usuario y su carrito
-          // member.disconnectTimeout = setTimeout(() => {
-          // Eliminar al usuario de la sala después del tiempo establecido
-          room.members.splice(memberIndex, 1)
-          const cartIndex = room.sharedCartList.findIndex(
-            cart => cart.username === member.username
-          )
-          if (cartIndex !== -1) {
-            room.sharedCartList.splice(cartIndex, 1)
-          }
+          member.disconnectTimeout = setTimeout(() => {
+            // Eliminar al usuario de la sala después del tiempo establecido
+            room.members.splice(memberIndex, 1)
+            const cartIndex = room.sharedCartList.findIndex(
+              cart => cart.username === member.username
+            )
+            if (cartIndex !== -1) {
+              room.sharedCartList.splice(cartIndex, 1)
+            }
 
-          // Emitir evento para actualizar a los usuarios restantes en la sala
-          io.to(roomId).emit('SHARED_CART_UPDATED', room.sharedCartList)
+            // Emitir evento para actualizar a los usuarios restantes en la sala
+            io.to(roomId).emit('SHARED_CART_UPDATED', room.sharedCartList)
 
-          // Si la sala está vacía, puedes considerar eliminarla completamente
-          if (room.members.length === 0) {
-            delete rooms[roomId]
-          }
-          // }, 3000);
+            // Si la sala está vacía, puedes considerar eliminarla completamente
+            if (room.members.length === 0) {
+              delete rooms[roomId]
+            }
+          }, 11000) // 11 seconds
         }
       })
     })
+
+    // socketHandlers.ts (Back-End)
+
+    // socket.on('disconnect', () => {
+    //   Object.keys(rooms).forEach(roomId => {
+    //     const room = rooms[roomId]
+    //     const memberIndex = room.members.findIndex(
+    //       member => member.socketId === socket.id
+    //     )
+
+    //     if (memberIndex !== -1) {
+    //       const member = room.members[memberIndex]
+    //       // If the disconnect was not intentional, start the grace period
+    //       if (!member.intentionalDisconnect) {
+    //         member.disconnectTimeout = setTimeout(() => {
+    //           // Check if the user is still marked as offline before removing
+    //           if (!member.online) {
+    //             room.members.splice(memberIndex, 1) // Remove the member from the members array
+    //             const cartIndex = room.sharedCartList.findIndex(
+    //               cart => cart.username === member.username
+    //             )
+    //             if (cartIndex !== -1) {
+    //               room.sharedCartList.splice(cartIndex, 1) // Remove the member's cart
+    //             }
+    //             // Emit an event to update the shared cart for remaining users
+    //             io.to(roomId).emit('SHARED_CART_UPDATED', room.sharedCartList)
+
+    //             // If the room is empty, you might want to delete it
+    //             if (room.members.length === 0) {
+    //               delete rooms[roomId]
+    //             }
+    //           }
+    //         }, 5000) // 5-second grace period
+    //       } else {
+    //         // If the disconnect was intentional, perform immediate cleanup
+    //         clearTimeout(member.disconnectTimeout) // Clear the timeout if it exists
+    //         room.members.splice(memberIndex, 1) // Remove the member from the members array
+    //         const cartIndex = room.sharedCartList.findIndex(
+    //           cart => cart.username === member.username
+    //         )
+    //         if (cartIndex !== -1) {
+    //           room.sharedCartList.splice(cartIndex, 1) // Remove the member's cart
+    //         }
+    //         // Emit an event to update the shared cart for remaining users
+    //         io.to(roomId).emit('SHARED_CART_UPDATED', room.sharedCartList)
+
+    //         // If the room is empty, you might want to delete it
+    //         if (room.members.length === 0) {
+    //           delete rooms[roomId]
+    //         }
+    //       }
+    //     }
+    //   })
+    // })
 
     // socket.on('disconnect', () => {
     //   console.log(`🔴 Usuario desconectado: ${socket.id}`)

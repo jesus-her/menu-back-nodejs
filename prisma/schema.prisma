@@ -27,6 +27,7 @@ model Store {
   categories  Category[] @relation("StoreCategories")
   banners     Banner[] @relation("StoreBanners")
   products    Product[]  @relation("StoreProducts")
+  orders      Order[]  @relation("StoreOrders")
   users       user[]
 }
 
@@ -38,8 +39,9 @@ model Product {
   price       Float
   storeId     Int
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   store       Store    @relation("StoreProducts", fields: [storeId], references: [id])
+  cartItem  CartItem[]
 }
 
 model Category {
@@ -59,4 +61,33 @@ model Banner {
   description   String
   storeId       Int
   store         Store     @relation("StoreBanners", fields: [storeId], references: [id])
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  createdAt   DateTime    @default(now())
+  isShared    Boolean     @default(false)
+  total       Float
+  paymentType String
+  storeId     Int
+  store       Store      @relation("StoreOrders", fields: [storeId], references: [id])
+  userOrders  UserOrder[]
+}
+
+model UserOrder {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  username  String
+  cartPrice Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  cartList  CartItem[]
+}
+
+model CartItem {
+  id         Int       @id @default(autoincrement())
+  userOrderId Int
+  productId  Int
+  quantity   Int
+  product    Product  @relation(fields: [productId], references: [id])
+  userOrder  UserOrder @relation(fields: [userOrderId], references: [id])
 }
