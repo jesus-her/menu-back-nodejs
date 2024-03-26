@@ -48,10 +48,10 @@ export const getAllCategories = async (
 ): Promise<void> => {
   try {
     const categories = await prisma.category.findMany({
-      include: {
-        store: true // Incluye detalles de la tienda
-        // products: true, // Descomenta si también deseas incluir los productos asociados a cada categoría
-      }
+      // include: {
+      //   store: true // Incluye detalles de la tienda
+      //   // products: true, // Descomenta si también deseas incluir los productos asociados a cada categoría
+      // }
     })
     res.status(200).json(categories)
   } catch (error: any) {
@@ -156,7 +156,9 @@ export const deleteCategory = async (
       where: { id: categoryId }
     })
 
-    res.status(204).send() // No Content
+    res
+      .status(200)
+      .json({ message: 'Categoría y productos eliminados con éxito' })
   } catch (error: any) {
     console.error('Error al eliminar la categoría: ', error)
     res.status(500).json({
