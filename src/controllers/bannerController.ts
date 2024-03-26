@@ -47,22 +47,46 @@ export const createBanner = async (
   }
 }
 
+// export const getAllBanners = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const banners = await prisma.banner.findMany({
+//       include: {
+//         store: true // Incluye detalles de la tienda
+//       }
+//     })
+//     res.status(200).json(banners)
+//   } catch (error: any) {
+//     console.error('Error al obtener los banners: ', error)
+//     res.status(500).json({
+//       error: 'Hubo un error al obtener los banners, pruebe más tarde'
+//     })
+//   }
+// }
+
 export const getAllBanners = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  const storeId = req.query.store
+
   try {
+    const whereClause = storeId ? { storeId: Number(storeId) } : {}
     const banners = await prisma.banner.findMany({
-      include: {
-        store: true // Incluye detalles de la tienda
-      }
+      where: whereClause
+      // include: {
+      //   store: true // Incluye detalles de la tienda solo si necesitas esta información
+      // }
     })
+
     res.status(200).json(banners)
   } catch (error: any) {
     console.error('Error al obtener los banners: ', error)
-    res.status(500).json({
-      error: 'Hubo un error al obtener los banners, pruebe más tarde'
-    })
+    res
+      .status(500)
+      .json({ error: 'Hubo un error al obtener los banners, pruebe más tarde' })
   }
 }
 
@@ -90,6 +114,25 @@ export const getBannerById = async (
     res
       .status(500)
       .json({ error: 'Hubo un error al obtener el banner, pruebe más tarde' })
+  }
+}
+
+export const getBannersByStoreId = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params
+    const banners = await prisma.banner.findMany({
+      where: { storeId: Number(id) }
+    })
+
+    res.status(200).json(banners)
+  } catch (error: any) {
+    console.error('Error al obtener los banners by store: ', error)
+    res.status(500).json({
+      error: 'Hubo un error al obtener los banners by store, pruebe más tarde'
+    })
   }
 }
 

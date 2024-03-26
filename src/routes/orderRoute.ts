@@ -1,13 +1,10 @@
 import express, { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import {
-  createBanner,
-  getAllBanners,
-  getBannerById,
-  getBannersByStoreId,
-  updateBanner,
-  deleteBanner
-} from '../controllers/bannerController'
+  createOrder,
+  getOrderById,
+  getAllOrdersByStore
+} from '../controllers/orderController'
 
 const router = express.Router()
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret'
@@ -29,14 +26,8 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   })
 }
 
-// router.get('/store/:id', getBannersByStoreId)
-router.post('/', createBanner)
-router.get('/', getAllBanners)
-router.get('/:id', getBannerById)
-router.patch('/:id', updateBanner)
-router.delete('/:id', deleteBanner)
-
-// Añade la nueva ruta para obtener banners por storeId
-// router.delete('/:id', authenticateToken, deleteCategory)
+router.post('/', createOrder)
+router.get('/', getAllOrdersByStore)
+router.get('/:id', getOrderById)
 
 export default router

@@ -105,33 +105,6 @@ export const getAllProducts = async (
   }
 }
 
-// en tu archivo productsController.ts
-
-// export const getProductsByStore = async (
-//   req: Request,
-//   res: Response
-// ): Promise<void> => {
-//   const storeId = parseInt(req.params.storeId)
-
-//   try {
-//     const products = await prisma.product.findMany({
-//       where: {
-//         storeId: storeId
-//       }
-//       // Puedes omitir take y skip para retornar todos los productos de una vez
-//     })
-
-//     res.status(200).json(products)
-//   } catch (error: any) {
-//     console.error('Error al obtener los productos: ', error)
-//     res
-//       .status(500)
-//       .json({
-//         error: 'Hubo un error al obtener los productos, pruebe más tarde'
-//       })
-//   }
-// }
-
 export const updateProduct = async (
   req: Request,
   res: Response
@@ -173,7 +146,7 @@ export const deleteProduct = async (
       where: { id: Number(id) }
     })
 
-    res.status(204).send() // No Content
+    res.status(200).json({ message: 'Producto eliminado con éxito' })
   } catch (error: any) {
     console.error('Error al ELIMINAR los productos filtrados: ', error)
     res.status(500).json({
